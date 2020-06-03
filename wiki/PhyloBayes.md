@@ -44,7 +44,7 @@ Code examples
 -------------
 
 The first thing that is needed in bayesian (and ML) phylogenetic inference is the model of evolution.
-Current there are two models of evolution implemented: Felsenstein81 (`Bio.Phylo.EvolutionModel.F81`),
+Currently there are two models of evolution implemented: Felsenstein81 (`Bio.Phylo.EvolutionModel.F81`),
 which models only the stationary distribution of nucleotides,
 and General Time Reversible model (`Bio.Phylo.EvolutionModel.GTRModel`), which also models the excheangability parameters:
 the rates at which specific nucleotides are exchanged.
@@ -78,6 +78,49 @@ Here are some examples:
 >>> gtrmodel.get_probability("A", "C", t=1)
 0.11773674440501203
 ```
+
+The second thing is the likelihood computation. This is achieved using a `Bio.Phylo.TreeConstruction.LikelihoodScorer` 
+class. To create an instance of this class, you need to pass an `EvolutionModel` instance (currently `F81Model` or `GTRModel`).
+Then you call the method `get_score` with tree and MSA as arguments.
+
+```python
+>>> from Bio import AlignIO, Phylo
+>>> aln = AlignIO.read(open("TreeConstruction/lk_msa.phy"), "phylip") # a sample alignment
+>>> print(aln)
+SingleLetterAlphabet() alignment with 4 rows and 6 columns
+AACACA Alpha
+AACGCA Beta
+AACGTG Delta
+ATTACA Gamma
+>>> tree = Phylo.read(open("TreeConstruction/lk.tre"), "newick") # and a sample tree
+>>> print(tree)
+Tree(rooted=False, weight=1.0)
+    Clade(branch_length=0.0)
+        Clade(branch_length=3.0)
+            Clade(branch_length=1.0, name='Alpha')
+            Clade(branch_length=2.5, name='Beta')
+        Clade(branch_length=4.5)
+            Clade(branch_length=1.0, name='Gamma')
+            Clade(branch_length=1.0, name='Delta')
+>>> from Bio.Phylo.EvolutionModel import F81Model
+>>> evolution_model = F81Model()
+>>> from Bio.Phylo.TreeConstruction import LikelihoodScorer
+>>> scorer = LikelihoodScorer(evolution_model=evolution_model)
+>>> scorer.get_score(tree, aln)
+-33.31209847109528
+```
+
+The third thing we need is an MCMC algorithm.
+
+TODO: dodać przykłady
+
+
+Specific example
+----------------
+
+As a specific example of bayesian inference we will try to reconstruct the phylogeny of the primates
+using mitochondrial sequences. We will compare the result to an existing method - maximum parsimony 
+(`Bio.Phylo.TreeConstruction.ParsimonyTreeConstructor`).
 
 
 

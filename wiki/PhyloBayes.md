@@ -17,4 +17,4 @@ Bayesian inference
 
 All of the bayesian inference is built upon Bayes theorem:
 
-![P(T|X)=\frac{P(X|T)P(T)}{P(X)}](bayes_theorem.svg)
+![P(T|X)=\frac{P(X|T)P(T)}{P(X)}](bayes_theorem.png)

@@ -156,13 +156,13 @@ For the MCMC we need some parameters:
 ```
 
 Now we can perform MCMC sampling. The `get_results` method returns a lot of output.
-For now we'll only need first two lists: a list containing trees and a number of consecutive
+For now we'll only need first three lists: a list containing trees and a number of consecutive
 appearances of each tree.
 
 WARNING: the code below takes some time (~30 minutes). TODO: sprawdzić ile dokładnie
 
 ```python
->>> trees, counts, *_ = sampler.get_results(msa=aln, evolution_model=F81Model(), no_iterations=10000, start_from_random_tree=True)
+>>> trees, likelihoods, counts, *_ = sampler.get_results(msa=aln, evolution_model=F81Model(), no_iterations=10000, start_from_random_tree=True)
 
 ```
 

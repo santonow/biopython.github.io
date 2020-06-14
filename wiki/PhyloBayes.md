@@ -149,21 +149,109 @@ For the MCMC we need some parameters:
 >>> from Bio.Phylo.EvolutionModel import F81Model
 >>> from Bio import Phylo
 # we'll sample topology and evolution model with equal probability
->>> sampler = SamplerMCMC(steps_param={
-                      LocalWithoutClockStepper(1.0): 0.5,
-                      ChangeEvolutionParamStepper(0.05): 0.5,
-                      })
+>>> sampler = SamplerMCMC(
+    steps_param={
+        LocalWithoutClockStepper(1.0): 0.5,
+        ChangeEvolutionParamStepper(0.05): 0.5,
+    }
+)
 ```
 
-Now we can perform MCMC sampling. The `get_results` method returns a lot of output.
-For now we'll only need first three lists: a list containing trees and a number of consecutive
-appearances of each tree.
+Now we can perform MCMC sampling. 
 
 WARNING: the code below takes some time (~30 minutes). TODO: sprawdzić ile dokładnie
 
 ```python
->>> trees, likelihoods, counts, *_ = sampler.get_results(msa=aln, evolution_model=F81Model(), no_iterations=10000, start_from_random_tree=True)
+>>> import random
+>>> import numpy as np
+>>> np.random.seed(42)
+>>> random.seed(42)
+>>> output = sampler.get_results(msa=aln, evolution_model=GTRModel(), no_iterations=10000, start_from_random_tree=True)
+>>> trees, counts, likelihoods = output[:2]
+```
 
+We'll plot the likelihoods:
+
+```python
+import matplotlib.pyplot as plt
+plt.plot(likelihoods)
+plt.show()
+```
+
+![likelihoods](likelihoods.png)
+
+Something weird happened around 100th tree – a really unfortunate acceptance of a bad tree.
+
+Now we can create a list containing trees and their consecutive counts:
+
+```python
+>>> tree_counts = list(zip(trees, counts))
+```
+
+We also need to cut some of the first trees - it's called a burn-in phase.
+Following function does that, assuming we have a tree counts like above.
+
+```python
+def cut_burn_in(burn_in, tree_counts):
+    tree_index = 0
+    tree_count_index = 0
+    tree_count = 0
+    while tree_count < burn_in:
+        tree_count += tree_counts[tree_index][1]
+        tree_index += 1
+    tree_count -= tree_counts[tree_index - 1][1]
+    trees_left = burn_in - tree_count
+    new_tree_counts = tree_counts[tree_index-1:]
+    new_tree_counts[0] = (new_tree_counts[0][0], new_tree_counts[0][1] - trees_left)
+    if new_tree_counts[0][1] == 0:
+        new_tree_counts = new_tree_counts[1:]
+    return new_tree_counts
+```
+
+Now we'll cut first 4500 trees:
+
+```python
+>>> new_tree_counts = cut_burn_in(4500, tree_counts)
+```
+
+And now we'll find a consensus tree.
+
+```python
+>>> from Bio.Phylo.Consensus import majority_consensus
+>>> tree = majority_consensus(new_tree_counts, mcmc=True)
+>>> Phylo.draw_ascii(tree)
+           ______________________________________________________ Gorilla
+  ________|
+ |        |  ___________________________________________ Pan
+ |        |_|
+ |          |______________________________________ Homo_sapiens
+_|
+ |________________________ Pongo
+ |
+ |______________________________________________________________ Hylobates
+```
+
+It may not look like a binary tree, but that's because the branch leading to a sister clade
+of Hylobates is really short. In reality, the topology is good, 
+although there are some problems with internal branches lengths.
+
+We can visualize the `MCMC` chain with function `visualize_changes` from `Bio.Phylo`.
+It creates a gif based on the output from `MCMC` (or more generally from a list of trees).
+Requires `imageio` and possibly `pygifsicle` (if you want to optimize the gif size) to work
+
+Here's the example:
+
+```python
+>>> from Bio.Phylo import visualize_changes
+>>> visualize_changes(trees, "trees", s=60) # creates a 60 second trees.gif
+```
+
+![trees.gif](trees.gif)
+
+If you supply the whole output of the MCMC to the function, it will highlight changes during the animation.
+
+```python
+>>> visualize_changes(output, "trees_highlighted", s=60, optimized=True) # optimized gif; uses pygifsickle
 ```
 
 

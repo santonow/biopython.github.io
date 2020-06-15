@@ -164,6 +164,10 @@ You can try and use a simpler model (`F81Model`) or use fewer iterations,
 but some parameters should be then adjusted (especially burn-in).
 
 ```python
+>>> import random
+>>> import numpy as np
+>>> np.random.seed(1)
+>>> random.seed(1)
 >>> output = sampler.get_results(msa=aln, evolution_model=GTRModel(), no_iterations=10000, start_from_random_tree=True)
 >>> trees, counts, likelihoods = output[:3]
 ```

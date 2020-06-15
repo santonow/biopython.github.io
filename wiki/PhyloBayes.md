@@ -159,9 +159,9 @@ For the MCMC we need some parameters:
 
 Now we can perform MCMC sampling. 
 
-WARNING: the code below takes some time (~1.5 hours). 
+WARNING: the code below takes some time (~72 minutes). 
 You can try and use a simpler model (`F81Model`) or use fewer iterations, 
-but some parameters should be then adjusted (especially burn-in).
+but then the burn-in should be adjusted.
 
 ```python
 >>> import random
@@ -221,22 +221,18 @@ And now we'll find a consensus tree.
 ```python
 >>> from Bio.Phylo.Consensus import majority_consensus
 >>> tree = majority_consensus(new_tree_counts, mcmc=True)
->>> tree.root_at_midpoint() # works well in an example that simple
+>>> tree.root_with_outgroup("Hylobates") # Hylobates is an outgroup for the rest of the taxons
 >>> Phylo.draw_ascii(tree)
-           ______________________________________________________ Gorilla
-  ________|
- |        |  ___________________________________________ Pan
- |        |_|
- |          |______________________________________ Homo_sapiens
+  _________________________ Hylobates
 _|
- |________________________ Pongo
- |
- |______________________________________________________________ Hylobates
+ |  _____________________________________________________________ Pongo
+ |_|
+   |  _____________________________________ Gorilla
+   |_|
+     | _______________________________ Homo_sapiens
+     ||
+      |_____________________________ Pan
 ```
-
-It may not look like a binary tree, but that's because the branch leading to a sister clade
-of Hylobates is really short. In reality, the topology is good, 
-although there are some problems with internal branches lengths.
 
 We can visualize the `MCMC` chain with function `visualize_changes` from `Bio.Phylo`.
 It creates a gif based on the output from `MCMC` (or more generally from a list of trees).
@@ -254,8 +250,10 @@ Here's the example:
 If you supply the whole output of the MCMC to the function, it will highlight changes during the animation.
 
 ```python
->>> visualize_changes(output, "trees_highlighted", s=60, optimized=True) # optimized gif; uses pygifsicle
+>>> visualize_changes(output, "trees_highlight", s=60, optimized=True) # optimized gif; uses pygifsicle
 ```
+
+![trees_highlight.gif](trees_highlight.gif)
 
 
     

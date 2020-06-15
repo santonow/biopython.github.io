@@ -180,9 +180,9 @@ plt.plot(likelihoods)
 plt.show()
 ```
 
-![likelihoods](likelihoods.png)
+![likelihoods](likelihood.png)
 
-Something weird happened around 100th tree – a really unfortunate acceptance of a bad tree.
+The convergence starts around 100th tree.
 
 Now we can create a list containing trees and their consecutive counts:
 

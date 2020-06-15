@@ -159,7 +159,9 @@ For the MCMC we need some parameters:
 
 Now we can perform MCMC sampling. 
 
-WARNING: the code below takes some time (~30 minutes). TODO: sprawdzić ile dokładnie
+WARNING: the code below takes some time (~1.5 hours). 
+You can try and use a simpler model (`F81Model`) or use fewer iterations, 
+but some parameters should be then adjusted (especially burn-in).
 
 ```python
 >>> import random
@@ -167,7 +169,7 @@ WARNING: the code below takes some time (~30 minutes). TODO: sprawdzić ile dok�
 >>> np.random.seed(42)
 >>> random.seed(42)
 >>> output = sampler.get_results(msa=aln, evolution_model=GTRModel(), no_iterations=10000, start_from_random_tree=True)
->>> trees, counts, likelihoods = output[:2]
+>>> trees, counts, likelihoods = output[:3]
 ```
 
 We'll plot the likelihoods:
@@ -219,6 +221,7 @@ And now we'll find a consensus tree.
 ```python
 >>> from Bio.Phylo.Consensus import majority_consensus
 >>> tree = majority_consensus(new_tree_counts, mcmc=True)
+>>> tree.root_at_midpoint() # works well in an example that simple
 >>> Phylo.draw_ascii(tree)
            ______________________________________________________ Gorilla
   ________|
@@ -251,7 +254,7 @@ Here's the example:
 If you supply the whole output of the MCMC to the function, it will highlight changes during the animation.
 
 ```python
->>> visualize_changes(output, "trees_highlighted", s=60, optimized=True) # optimized gif; uses pygifsickle
+>>> visualize_changes(output, "trees_highlighted", s=60, optimized=True) # optimized gif; uses pygifsicle
 ```
 
 
